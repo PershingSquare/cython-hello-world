@@ -16,6 +16,8 @@ add_extension = Extension(
         libraries=["add"],
         library_dirs=["lib"],
         include_dirs=["lib", numpy.get_include()],
+        extra_compile_args=['-fopenmp'],
+        extra_link_args=['-fopenmp'],
         annotate=True
 )
 

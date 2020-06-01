@@ -2,6 +2,7 @@ import numpy as np
 cimport numpy as np
 cimport cython
 from cython cimport view
+from cython.parallel import prange
 
 DTYPE = np.float32
 ctypedef np.float32_t DTYPE_t
@@ -19,11 +20,22 @@ def cython_add(const np.float32_t[::1] a, const np.float32_t[::1] b):
 
     cdef int N = a.shape[0]
     cdef np.float32_t[::1] c = np.empty(N, dtype=DTYPE)
+    cdef int i
     with nogil:
         for i in range(N):
             c[i] = a[i] + b[i]
 
     return c.base
+
+# Cython prange Example
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def cython_padd(const np.float32_t[::1] a, const np.float32_t[::1] b):
+    cdef int N = a.shape[0]
+    cdef int i
+    cdef np.float32_t[::1] c = np.empty(N, dtype=DTYPE)
+    for i in prange(N, nogil=True, schedule='guided'):
+        c[i] = a[i] + b[i]
 
 # Cython wrapped C
 
