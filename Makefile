@@ -12,4 +12,4 @@ cpuadd.o: add_cpu.c add_cpu.h
 	$(CC) -c $<
 
 clean:
-	rm -rf *.o *.a *.so add.c lib build
+	rm -rf *.o *.a *.so *.html add.c lib build
