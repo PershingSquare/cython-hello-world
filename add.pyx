@@ -3,6 +3,7 @@ cimport numpy as np
 cimport cython
 from cython cimport view
 from cython.parallel import prange
+from mpi4py import MPI
 
 DTYPE = np.float32
 ctypedef np.float32_t DTYPE_t
@@ -37,6 +38,8 @@ def cython_padd(const np.float32_t[::1] a, const np.float32_t[::1] b):
     for i in prange(N, nogil=True, schedule='guided'):
         c[i] = a[i] + b[i]
 
+    return c.base
+
 # Cython wrapped C
 
 cdef extern from "add_cpu.c":
@@ -65,6 +68,37 @@ def c_wrapped_add(
     add_array(<float*> a.data, <float*> b.data, <float*> c.data, items)
 
     return c
+
+# Cython wrapped C MPI
+
+cdef extern from "add_mpi.c":
+    pass
+
+cdef extern from "add_mpi.h":
+    void add_vectors_mpi(float *, float *, float *, int)
+
+def c_wrapped_add_mpi(
+        np.ndarray[DTYPE_t, ndim=1] a,
+        np.ndarray[DTYPE_t, ndim=1] b):
+
+    cdef int items = a.shape[0]
+
+    cdef np.ndarray c = np.empty((items, ), dtype=DTYPE)
+
+    if not a.flags['C_CONTIGUOUS']:
+        a = np.ascontiguousarray(a)
+
+    if not b.flags['C_CONTIGUOUS']:
+        b = np.ascontiguousarray(b)
+
+    if not c.flags['C_CONTIGUOUS']:
+        c = np.ascontiguousarray(c)
+
+
+    add_vectors_mpi(<float*> a.data, <float*> b.data, <float*> c.data, items)
+
+    return c
+
 '''
 cdef extern from "add_gpu.cu":
     pass

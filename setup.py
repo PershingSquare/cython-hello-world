@@ -4,6 +4,10 @@ from distutils.core import setup
 from distutils.extension import Extension
 from distutils.command.build import build as _build
 import subprocess
+import os
+
+mpi_compile_args = os.popen("mpicc --showme:compile").read().strip().split(' ')
+mpi_link_args = os.popen("mpicc --showme:link").read().strip().split(' ')
 
 def make_all():
     if subprocess.call(["make"]):
@@ -16,8 +20,8 @@ add_extension = Extension(
         libraries=["add"],
         library_dirs=["lib"],
         include_dirs=["lib", numpy.get_include()],
-        extra_compile_args=['-fopenmp'],
-        extra_link_args=['-fopenmp'],
+        extra_compile_args=mpi_compile_args,
+        extra_link_args=mpi_link_args,
         annotate=True
 )
 
