@@ -1,16 +1,13 @@
-CC = mpicc
-CXXFLAGS= -Wl,--copy-dt-needed-entries -Wl,--no-as-needed
-LDIR = lib
+LIB_DIR = lib
 
-default: libadd.a
+default: cythonwrapper
 
-libadd.a: add_cpu.o
-	ar rcs $@ $^
-	mkdir -p lib
-	mv $@ lib/$@
+cythonwrapper: setup.py add.pyx $(LIB_DIR)/libadd.a
+	python3 setup.py build_ext --inplace
 
-cpuadd.o: add_cpu.c add_cpu.h
-	$(CC) $(CXXFLAGS) -c $<
+$(LIB_DIR)/libadd.a:
+	make -C $(LIB_DIR) libadd.a
+
 
 clean:
-	rm -rf *.o *.a *.so *.html add.c lib build
+	rm -rf *.o *.a *.so *.html add.c build
